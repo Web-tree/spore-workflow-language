@@ -1,0 +1,50 @@
+{
+  "language": "swl",
+  "name": "approval",
+  "start": "prepare",
+  "requires": [
+    "core"
+  ],
+  "actions": {
+    "prepare": {
+      "effect": "idempotent",
+      "outcomes": [
+        "ok"
+      ],
+      "retry": {
+        "maxAttempts": 2
+      }
+    }
+  },
+  "nodes": {
+    "prepare": {
+      "kind": "activity",
+      "action": "prepare",
+      "routes": {
+        "ok": "review",
+        "failed": "rejected"
+      }
+    },
+    "review": {
+      "kind": "await-signal",
+      "signal": "review",
+      "routes": {
+        "approved": "done",
+        "rejected": "rejected"
+      }
+    },
+    "done": {
+      "kind": "complete",
+      "output": {
+        "status": "approved"
+      }
+    },
+    "rejected": {
+      "kind": "fail",
+      "error": {
+        "code": "approval.rejected",
+        "message": "Not approved"
+      }
+    }
+  }
+}
