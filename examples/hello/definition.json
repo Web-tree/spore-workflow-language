@@ -1,0 +1,43 @@
+{
+  "language": "swl",
+  "name": "hello",
+  "start": "greet",
+  "requires": [
+    "core"
+  ],
+  "actions": {
+    "greet": {
+      "effect": "read-only",
+      "outcomes": [
+        "ok"
+      ],
+      "inputSchema": {
+        "type": "object"
+      }
+    }
+  },
+  "nodes": {
+    "greet": {
+      "kind": "activity",
+      "action": "greet",
+      "input": {
+        "$get": [
+          "input"
+        ]
+      },
+      "routes": {
+        "ok": "done"
+      }
+    },
+    "done": {
+      "kind": "complete",
+      "output": {
+        "$get": [
+          "nodes",
+          "greet",
+          "output"
+        ]
+      }
+    }
+  }
+}

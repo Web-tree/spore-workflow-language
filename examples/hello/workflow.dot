@@ -1,0 +1,7 @@
+// SWL-DOT example: graph topology only.
+digraph "hello" {
+  start = "greet";
+  greet [kind="activity", label="Say hello"];
+  done [kind="complete"];
+  greet -> done;
+}

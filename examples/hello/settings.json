@@ -1,0 +1,32 @@
+{
+  "actions": {
+    "greet": {
+      "effect": "read-only",
+      "outcomes": [
+        "ok"
+      ],
+      "inputSchema": {
+        "type": "object"
+      }
+    }
+  },
+  "nodes": {
+    "greet": {
+      "action": "greet",
+      "input": {
+        "$get": [
+          "input"
+        ]
+      }
+    },
+    "done": {
+      "output": {
+        "$get": [
+          "nodes",
+          "greet",
+          "output"
+        ]
+      }
+    }
+  }
+}
