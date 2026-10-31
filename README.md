@@ -29,7 +29,7 @@ Human-readable **SWL-DOT** graph:
 digraph "review" {
   start = "build";
   build [kind="activity"];
-  approve [kind="wait"];
+  approve [kind="await-signal"];
   done [kind="complete"];
   rejected [kind="fail"];
   build -> approve [on="ok"];
