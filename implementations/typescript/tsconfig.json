@@ -8,7 +8,7 @@
       "DOM"
     ],
     "types": [
-      "bun"
+      "bun-types"
     ],
     "strict": true,
     "noEmit": true,
