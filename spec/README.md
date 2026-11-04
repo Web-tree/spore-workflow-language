@@ -11,6 +11,7 @@ This directory is the **normative-design workspace** for the independent Spore W
 | State | [Durability and State](state.md) |
 | Packaging | [Distribution](distribution.md) |
 | Compatibility | [Conformance](conformance.md) |
+| Tests | [Fixtures](fixtures.md) |
 
 **Conformance parts are independent subject to declared dependencies.** A tool that only reads SWL-DOT implements neither runtime semantics nor state persistence; a Temporal host can implement SWL semantics without using a Runspore store.
 

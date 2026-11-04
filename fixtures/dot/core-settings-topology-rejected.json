@@ -1,0 +1,12 @@
+{
+  "fixture": "dot",
+  "title": "settings.json may not change a node's kind, which the DOT file owns",
+  "spec": "notation §1",
+  "profiles": ["core"],
+  "source": "digraph \"hello\" {\n  start = \"greet\";\n  done [kind=\"complete\"];\n  greet -> done;\n}\n",
+  "settings": {
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": { "greet": { "action": "greet" }, "done": { "kind": "fail" } }
+  },
+  "expect": { "rejected": true }
+}

@@ -1,0 +1,33 @@
+{
+  "fixture": "trace",
+  "title": "Cancel sends a cancel command for the open invocation, ends the run as cancelled, and a late result is ignored",
+  "spec": "execution §5; invocation §4",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": ["core"],
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r12" }, "expect": { "status": "running" } },
+    {
+      "event": { "type": "cancel", "reason": "no longer needed" },
+      "expect": {
+        "status": "cancelled",
+        "positions": [],
+        "commands": [{ "type": "cancel", "invocation": { "node": "greet", "visit": 1 } }],
+        "diagnostics": ["run.cancel-requested"]
+      }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "greet", "visit": 1 }, "status": "success", "outcome": "ok" },
+      "expect": { "status": "cancelled", "commands": [], "diagnostics": ["event.ignored-terminal"] }
+    }
+  ]
+}

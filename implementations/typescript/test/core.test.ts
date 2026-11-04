@@ -73,12 +73,16 @@ describe("independent sequential core",()=>{
   });
   test("rejects dangling and missing business routes",()=>{
     const d:Definition=structuredClone(hello);(d.nodes.greet as {routes:Record<string,string>}).routes={bad:"nowhere"};
-    const errors=validateDefinition(d);
-    expect(errors.some(x=>x.includes("unknown route target"))).toBe(true);
-    expect(errors.some(x=>x.includes("missing outcome route"))).toBe(true);
+    const codes=validateDefinition(d).map(e=>e.code);
+    expect(codes).toContain("route.target");
+    expect(codes).toContain("route.incomplete");
   });
   test("rejects unsupported required profiles",()=>{
     const d:Definition=structuredClone(hello);d.requires=["core","parallel"];
-    expect(validateDefinition(d)).toContain("unsupported required profile: parallel");
+    expect(validateDefinition(d).map(e=>e.code)).toContain("requires.unsupported");
+  });
+  test("rejects unknown members, which the schema already did",()=>{
+    const d:Definition=structuredClone(hello);(d.nodes.greet as Record<string,unknown>).join="all";
+    expect(validateDefinition(d).map(e=>e.code)).toContain("node.member");
   });
 });

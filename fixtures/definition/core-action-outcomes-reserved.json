@@ -1,0 +1,17 @@
+{
+  "fixture": "definition",
+  "title": "An action that declares the reserved outcome failed as a business outcome is rejected",
+  "spec": "definition §2, §4",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok", "failed"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done", "failed": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "expect": { "errors": ["action.outcomes"] }
+}

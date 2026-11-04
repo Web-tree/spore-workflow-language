@@ -1,0 +1,29 @@
+{
+  "fixture": "trace",
+  "title": "The workflow-wide activation cap is a terminal safety boundary, not a business route",
+  "spec": "definition §2; execution §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "spin",
+    "start": "check",
+    "requires": ["core"],
+    "limits": { "maxActivations": 2 },
+    "actions": { "check": { "effect": "pure", "outcomes": ["red", "ok"] } },
+    "nodes": {
+      "check": { "kind": "activity", "action": "check", "routes": { "red": "check", "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r15" }, "expect": { "status": "running", "positions": ["check"] } },
+    {
+      "event": { "type": "result", "invocation": { "node": "check", "visit": 1 }, "status": "success", "outcome": "red" },
+      "expect": { "status": "running", "positions": ["check"], "commands": [{ "type": "invoke", "node": "check", "visit": 2, "attempt": 1, "action": "check", "input": null, "params": null }] }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "check", "visit": 2 }, "status": "success", "outcome": "red" },
+      "expect": { "status": "failed", "positions": [], "commands": [] }
+    }
+  ]
+}

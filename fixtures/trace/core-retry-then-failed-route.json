@@ -1,0 +1,43 @@
+{
+  "fixture": "trace",
+  "title": "A retryable failure re-invokes the same logical invocation as attempt 2; when attempts run out the failed route is taken",
+  "spec": "execution §3, §4; invocation §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "approval",
+    "start": "prepare",
+    "requires": ["core"],
+    "actions": { "prepare": { "effect": "idempotent", "outcomes": ["ok"], "retry": { "maxAttempts": 2 } } },
+    "nodes": {
+      "prepare": { "kind": "activity", "action": "prepare", "routes": { "ok": "review", "failed": "rejected" } },
+      "review": { "kind": "await-signal", "signal": "review", "routes": { "approved": "done", "rejected": "rejected" } },
+      "done": { "kind": "complete" },
+      "rejected": { "kind": "fail", "error": { "code": "approval.rejected", "message": "Not approved" } }
+    }
+  },
+  "steps": [
+    {
+      "event": { "type": "start", "runId": "r5" },
+      "expect": { "commands": [{ "type": "invoke", "node": "prepare", "visit": 1, "attempt": 1, "action": "prepare", "input": null, "params": null }] }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "prepare", "visit": 1 }, "status": "failure", "error": "timeout", "retryable": true },
+      "expect": {
+        "status": "running",
+        "positions": ["prepare"],
+        "commands": [{ "type": "invoke", "node": "prepare", "visit": 1, "attempt": 2, "action": "prepare", "input": null, "params": null }]
+      }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "prepare", "visit": 1 }, "status": "failure", "error": "timeout", "retryable": true },
+      "expect": {
+        "status": "failed",
+        "positions": [],
+        "commands": [],
+        "nodes": { "prepare": { "visit": 1, "outcome": "failed", "output": { "error": "timeout" } } },
+        "error": { "code": "approval.rejected" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "fixture": "trace",
+  "title": "A signal routed to a fail node ends the run as failed with the node's declared error",
+  "spec": "execution §2, §5",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "approval",
+    "start": "prepare",
+    "requires": ["core"],
+    "actions": { "prepare": { "effect": "idempotent", "outcomes": ["ok"] } },
+    "nodes": {
+      "prepare": { "kind": "activity", "action": "prepare", "routes": { "ok": "review", "failed": "rejected" } },
+      "review": { "kind": "await-signal", "signal": "review", "routes": { "approved": "done", "rejected": "rejected" } },
+      "done": { "kind": "complete", "output": { "status": "approved" } },
+      "rejected": { "kind": "fail", "error": { "code": "approval.rejected", "message": "Not approved" } }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r3" }, "expect": { "status": "running", "positions": ["prepare"] } },
+    {
+      "event": { "type": "result", "invocation": { "node": "prepare", "visit": 1 }, "status": "success", "outcome": "ok" },
+      "expect": { "status": "waiting", "positions": ["review"] }
+    },
+    {
+      "event": { "type": "signal", "name": "review", "outcome": "rejected", "output": { "reason": "incomplete" } },
+      "expect": {
+        "status": "failed",
+        "positions": [],
+        "commands": [],
+        "nodes": { "review": { "visit": 1, "outcome": "rejected", "output": { "reason": "incomplete" } } },
+        "error": { "code": "approval.rejected", "message": "Not approved" }
+      }
+    }
+  ]
+}

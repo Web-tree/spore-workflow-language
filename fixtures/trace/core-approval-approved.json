@@ -1,0 +1,55 @@
+{
+  "fixture": "trace",
+  "title": "A waiting node ignores signals with another name or an unrouted outcome, and routes once on a matching one",
+  "spec": "execution §2, §5, §6",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "approval",
+    "start": "prepare",
+    "requires": ["core"],
+    "actions": { "prepare": { "effect": "idempotent", "outcomes": ["ok"], "retry": { "maxAttempts": 2 } } },
+    "nodes": {
+      "prepare": { "kind": "activity", "action": "prepare", "routes": { "ok": "review", "failed": "rejected" } },
+      "review": { "kind": "await-signal", "signal": "review", "routes": { "approved": "done", "rejected": "rejected" } },
+      "done": { "kind": "complete", "output": { "status": "approved" } },
+      "rejected": { "kind": "fail", "error": { "code": "approval.rejected", "message": "Not approved" } }
+    }
+  },
+  "steps": [
+    {
+      "event": { "type": "start", "runId": "r2" },
+      "expect": {
+        "status": "running",
+        "positions": ["prepare"],
+        "commands": [{ "type": "invoke", "node": "prepare", "visit": 1, "attempt": 1, "action": "prepare", "input": null, "params": null }]
+      }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "prepare", "visit": 1 }, "status": "success", "outcome": "ok", "output": { "draft": 7 } },
+      "expect": { "status": "waiting", "positions": ["review"], "commands": [], "nodes": { "prepare": { "visit": 1, "outcome": "ok", "output": { "draft": 7 } } } }
+    },
+    {
+      "event": { "type": "signal", "name": "other", "outcome": "approved" },
+      "expect": { "status": "waiting", "positions": ["review"], "commands": [], "diagnostics": ["signal.unmatched"] }
+    },
+    {
+      "event": { "type": "signal", "name": "review", "outcome": "maybe" },
+      "expect": { "status": "waiting", "positions": ["review"], "commands": [], "diagnostics": ["signal.unmatched"] }
+    },
+    {
+      "event": { "type": "signal", "name": "review", "outcome": "approved" },
+      "expect": {
+        "status": "completed",
+        "positions": [],
+        "commands": [],
+        "nodes": { "review": { "visit": 1, "outcome": "approved", "output": null } },
+        "result": { "status": "approved" }
+      }
+    },
+    {
+      "event": { "type": "signal", "name": "review", "outcome": "approved" },
+      "expect": { "status": "completed", "commands": [], "diagnostics": ["event.ignored-terminal"] }
+    }
+  ]
+}

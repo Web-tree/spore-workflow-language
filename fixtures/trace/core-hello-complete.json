@@ -1,0 +1,41 @@
+{
+  "fixture": "trace",
+  "title": "Start authorizes one invocation, its ok result completes the run with the mapped output, and a later event is ignored",
+  "spec": "execution §2, §3, §6",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": ["core"],
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "input": { "$get": ["input"] }, "routes": { "ok": "done" } },
+      "done": { "kind": "complete", "output": { "$get": ["nodes", "greet", "output"] } }
+    }
+  },
+  "steps": [
+    {
+      "event": { "type": "start", "runId": "r1", "input": { "task": "hello" } },
+      "expect": {
+        "status": "running",
+        "positions": ["greet"],
+        "commands": [{ "type": "invoke", "node": "greet", "visit": 1, "attempt": 1, "action": "greet", "input": { "task": "hello" }, "params": null }]
+      }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "greet", "visit": 1 }, "status": "success", "outcome": "ok", "output": { "greeting": "hi" } },
+      "expect": {
+        "status": "completed",
+        "positions": [],
+        "commands": [],
+        "nodes": { "greet": { "visit": 1, "outcome": "ok", "output": { "greeting": "hi" } } },
+        "result": { "greeting": "hi" }
+      }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "greet", "visit": 1 }, "status": "success", "outcome": "ok", "output": { "greeting": "again" } },
+      "expect": { "status": "completed", "commands": [], "diagnostics": ["event.ignored-terminal"], "result": { "greeting": "hi" } }
+    }
+  ]
+}

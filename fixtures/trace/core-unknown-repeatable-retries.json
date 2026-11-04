@@ -1,0 +1,36 @@
+{
+  "fixture": "trace",
+  "title": "An unknown result of a repeatable action is retried under the same invocation; when attempts run out it parks for intervention",
+  "spec": "execution §4, §6; invocation §3, §4",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": ["core"],
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"], "retry": { "maxAttempts": 2 } } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "done": { "kind": "complete", "output": { "$get": ["nodes", "greet", "output"] } }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r9" }, "expect": { "status": "running" } },
+    {
+      "event": { "type": "result", "invocation": { "node": "greet", "visit": 1 }, "status": "unknown" },
+      "expect": {
+        "status": "running",
+        "positions": ["greet"],
+        "commands": [{ "type": "invoke", "node": "greet", "visit": 1, "attempt": 2, "action": "greet", "input": null, "params": null }]
+      }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "greet", "visit": 1 }, "status": "unknown" },
+      "expect": { "status": "needs-intervention", "positions": ["greet"], "commands": [], "diagnostics": ["invocation.unknown"] }
+    },
+    {
+      "event": { "type": "resolve", "invocation": { "node": "greet", "visit": 1 }, "action": "complete", "outcome": "ok", "output": "resolved by hand" },
+      "expect": { "status": "completed", "positions": [], "commands": [], "result": "resolved by hand" }
+    }
+  ]
+}

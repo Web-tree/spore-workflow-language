@@ -1,0 +1,23 @@
+{
+  "fixture": "trace",
+  "title": "A mapping that reads a missing path is an error that fails the run before any invocation is authorized",
+  "spec": "definition §5; execution §2",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": ["core"],
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "input": { "$get": ["input", "missing"] }, "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "steps": [
+    {
+      "event": { "type": "start", "runId": "r14", "input": { "present": true } },
+      "expect": { "status": "failed", "positions": [], "commands": [] }
+    }
+  ]
+}

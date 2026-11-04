@@ -1,0 +1,18 @@
+{
+  "fixture": "definition",
+  "title": "A node with no path from start is rejected",
+  "spec": "definition §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "orphan": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "expect": { "errors": ["graph.unreachable"] }
+}

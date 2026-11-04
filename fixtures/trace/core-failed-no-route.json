@@ -1,0 +1,24 @@
+{
+  "fixture": "trace",
+  "title": "A terminal operational failure with no failed route ends the run as failed",
+  "spec": "execution §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": ["core"],
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r6" }, "expect": { "status": "running" } },
+    {
+      "event": { "type": "result", "invocation": { "node": "greet", "visit": 1 }, "status": "failure", "error": "boom", "retryable": false },
+      "expect": { "status": "failed", "positions": [], "commands": [], "result": null }
+    }
+  ]
+}

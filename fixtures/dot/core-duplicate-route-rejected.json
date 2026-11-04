@@ -1,0 +1,9 @@
+{
+  "fixture": "dot",
+  "title": "Two edges from one node with the same outcome are rejected",
+  "spec": "notation §3; definition §3",
+  "profiles": ["core"],
+  "source": "digraph \"dup\" {\n  start = \"a\";\n  b [kind=\"complete\"];\n  c [kind=\"complete\"];\n  a -> b;\n  a -> c;\n}\n",
+  "settings": { "actions": { "a": { "effect": "pure", "outcomes": ["ok"] } }, "nodes": { "a": { "action": "a" } } },
+  "expect": { "rejected": true }
+}

@@ -1,0 +1,28 @@
+{
+  "fixture": "trace",
+  "title": "A result for an invocation that isn't the open one does not advance the run",
+  "spec": "execution §5; invocation §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": ["core"],
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r11" }, "expect": { "status": "running", "positions": ["greet"] } },
+    {
+      "event": { "type": "result", "invocation": { "node": "greet", "visit": 2 }, "status": "success", "outcome": "ok" },
+      "expect": { "status": "running", "positions": ["greet"], "commands": [], "diagnostics": ["result.stale"] }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "greet", "visit": 1 }, "status": "success", "outcome": "ok" },
+      "expect": { "status": "completed", "positions": [] }
+    }
+  ]
+}

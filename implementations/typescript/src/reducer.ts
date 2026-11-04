@@ -86,7 +86,7 @@ function operationalFailure(d:Definition,s:RunState,nodeId:string,message:string
 /** A pure reducer. The host persists command intents and delivers them after committing state. */
 export function transition(definition:Definition,previous:RunState|null,event:Event):Decision {
   const problems=validateDefinition(definition);
-  if(problems.length) throw new Error("invalid definition: "+problems.join("; "));
+  if(problems.length) throw new Error("invalid definition: "+problems.map(e=>e.code+": "+e.message).join("; "));
   const commands:Command[]=[];
   const diagnostics:string[]=[];
   if(!previous){
