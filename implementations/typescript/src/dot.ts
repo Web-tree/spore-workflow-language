@@ -97,6 +97,6 @@ export function compileDot(source: string, settings: Settings = {}): Definition 
   for (const id of Object.keys(settings.nodes??{})) if (!(id in kinds)) throw new Error("settings mention unknown node: " + id);
   const definition: Definition = {language:"swl",name,start,nodes,...(settings.actions?{actions:settings.actions}:{}),...(settings.limits?{limits:settings.limits}:{}),...(settings.requires?{requires:settings.requires}:{}),...(settings.inputSchema?{inputSchema:settings.inputSchema}:{})};
   const errors=validateDefinition(definition);
-  if (errors.length) throw new Error(errors.join("; "));
+  if (errors.length) throw new Error(errors.map(e=>e.code+": "+e.message).join("; "));
   return definition;
 }

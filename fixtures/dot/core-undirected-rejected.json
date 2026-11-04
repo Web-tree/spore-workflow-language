@@ -1,0 +1,9 @@
+{
+  "fixture": "dot",
+  "title": "An undirected graph is rejected",
+  "spec": "notation §2",
+  "profiles": ["core"],
+  "source": "graph \"undirected\" {\n  start = \"a\";\n  done [kind=\"complete\"];\n  a -- done;\n}\n",
+  "settings": { "actions": { "a": { "effect": "pure", "outcomes": ["ok"] } }, "nodes": { "a": { "action": "a" } } },
+  "expect": { "rejected": true }
+}

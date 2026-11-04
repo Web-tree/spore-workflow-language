@@ -17,6 +17,7 @@ SWL defines how workflow graphs, action interfaces, execution, and durable state
 | [Durability and State](spec/state.md) | Persistence guarantees, store provider, inspection/export | Durable hosts, inspectors |
 | [Distribution](spec/distribution.md) | Packages, referenced assets and identity | Build tools, registries |
 | [Conformance](spec/conformance.md) | Feature profiles, interoperability tests and claims | Implementers |
+| [Fixtures](spec/fixtures.md) | The test files every implementation checks itself against | Implementers |
 | [Research](research/prior-art.md) | Attractor, SCXML, Open Workflow, ASL, CWL, Nexus, Temporal | Contributors |
 
 The parts are separately implementable **with declared dependencies**. A graph editor need not implement an engine. A workflow can run on Temporal or another host without using Runspore; implementers must reject unsupported required semantics rather than silently downgrade.

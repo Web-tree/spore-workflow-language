@@ -1,0 +1,27 @@
+{
+  "fixture": "trace",
+  "title": "A second start event does not create a second invocation",
+  "spec": "execution §5",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": ["core"],
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "steps": [
+    {
+      "event": { "type": "start", "runId": "r13" },
+      "expect": { "commands": [{ "type": "invoke", "node": "greet", "visit": 1, "attempt": 1, "action": "greet", "input": null, "params": null }] }
+    },
+    {
+      "event": { "type": "start", "runId": "r13" },
+      "expect": { "status": "running", "positions": ["greet"], "commands": [], "diagnostics": ["event.duplicate-start"] }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "fixture": "trace",
+  "title": "An unknown result of an unsafe action is never repeated automatically, even with attempts left; a resolve to retry re-invokes it",
+  "spec": "execution §4, §6; invocation §4",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "charge",
+    "start": "charge",
+    "requires": ["core"],
+    "actions": { "charge": { "effect": "unsafe", "outcomes": ["ok"], "retry": { "maxAttempts": 4 } } },
+    "nodes": {
+      "charge": { "kind": "activity", "action": "charge", "routes": { "ok": "done" } },
+      "done": { "kind": "complete", "output": { "$get": ["nodes", "charge", "output"] } }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r10" }, "expect": { "status": "running" } },
+    {
+      "event": { "type": "result", "invocation": { "node": "charge", "visit": 1 }, "status": "unknown" },
+      "expect": { "status": "needs-intervention", "positions": ["charge"], "commands": [], "diagnostics": ["invocation.unknown"] }
+    },
+    {
+      "event": { "type": "signal", "name": "anything", "outcome": "ok" },
+      "expect": { "status": "needs-intervention", "commands": [], "diagnostics": ["signal.unmatched"] }
+    },
+    {
+      "event": { "type": "resolve", "invocation": { "node": "charge", "visit": 1 }, "action": "retry" },
+      "expect": {
+        "status": "running",
+        "positions": ["charge"],
+        "commands": [{ "type": "invoke", "node": "charge", "visit": 1, "attempt": 2, "action": "charge", "input": null, "params": null }]
+      }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "charge", "visit": 1 }, "status": "success", "outcome": "ok", "output": { "receipt": "A1" } },
+      "expect": { "status": "completed", "result": { "receipt": "A1" }, "nodes": { "charge": { "visit": 1, "outcome": "ok", "output": { "receipt": "A1" } } } }
+    }
+  ]
+}

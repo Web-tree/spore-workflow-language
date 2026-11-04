@@ -1,0 +1,48 @@
+{
+  "fixture": "trace",
+  "title": "A limited outcome routes normally for its streak, each loop is a new visit and invocation, and the next occurrence takes exhausted",
+  "spec": "execution §3, §6",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "loop",
+    "start": "check",
+    "requires": ["core"],
+    "actions": { "check": { "effect": "pure", "outcomes": ["red", "ok"] } },
+    "nodes": {
+      "check": { "kind": "activity", "action": "check", "loopLimits": { "red": 2 }, "routes": { "red": "check", "ok": "done", "exhausted": "stop" } },
+      "done": { "kind": "complete" },
+      "stop": { "kind": "fail", "error": { "code": "check.exhausted", "message": "Still red after two tries" } }
+    }
+  },
+  "steps": [
+    {
+      "event": { "type": "start", "runId": "r7" },
+      "expect": { "commands": [{ "type": "invoke", "node": "check", "visit": 1, "attempt": 1, "action": "check", "input": null, "params": null }] }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "check", "visit": 1 }, "status": "success", "outcome": "red" },
+      "expect": {
+        "status": "running",
+        "positions": ["check"],
+        "commands": [{ "type": "invoke", "node": "check", "visit": 2, "attempt": 1, "action": "check", "input": null, "params": null }],
+        "nodes": { "check": { "visit": 1, "outcome": "red", "output": null } }
+      }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "check", "visit": 2 }, "status": "success", "outcome": "red" },
+      "expect": { "commands": [{ "type": "invoke", "node": "check", "visit": 3, "attempt": 1, "action": "check", "input": null, "params": null }] }
+    },
+    {
+      "event": { "type": "result", "invocation": { "node": "check", "visit": 3 }, "status": "success", "outcome": "red" },
+      "expect": {
+        "status": "failed",
+        "positions": [],
+        "commands": [],
+        "diagnostics": ["loop.exhausted"],
+        "nodes": { "check": { "visit": 3, "outcome": "red", "output": null } },
+        "error": { "code": "check.exhausted" }
+      }
+    }
+  ]
+}

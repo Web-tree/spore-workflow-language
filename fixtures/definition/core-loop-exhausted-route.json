@@ -1,0 +1,17 @@
+{
+  "fixture": "definition",
+  "title": "An exhausted route on a node without loopLimits is rejected",
+  "spec": "definition §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done", "exhausted": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "expect": { "errors": ["loop.exhausted-route"] }
+}

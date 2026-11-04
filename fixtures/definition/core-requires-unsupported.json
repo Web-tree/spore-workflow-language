@@ -1,0 +1,19 @@
+{
+  "fixture": "definition",
+  "title": "A validator that supports only core rejects a definition requiring another profile",
+  "spec": "definition §2, §6; conformance §5",
+  "profiles": ["core"],
+  "supported": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": ["core", "parallel"],
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "expect": { "errors": ["requires.unsupported"] }
+}

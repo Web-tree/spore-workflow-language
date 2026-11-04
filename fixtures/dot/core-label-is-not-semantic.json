@@ -1,0 +1,29 @@
+{
+  "fixture": "dot",
+  "title": "Labels and colours are discarded, so a graph with them normalizes to the same definition as one without",
+  "spec": "notation §2, §3; definition §6",
+  "profiles": ["core"],
+  "source": "digraph \"review\" {\n  start = \"build\";\n  build [kind=\"activity\", label=\"Build\", color=\"blue\"];\n  approve [kind=\"await-signal\", label=\"Approval\", shape=\"diamond\"];\n  done [kind=\"complete\"];\n  denied [kind=\"fail\"];\n  build -> approve [on=\"ok\", label=\"built\"];\n  build -> denied [on=\"failed\"];\n  approve -> done [on=\"approved\"];\n  approve -> denied [on=\"rejected\"];\n}\n",
+  "settings": {
+    "actions": { "build": { "effect": "idempotent", "outcomes": ["ok"] } },
+    "nodes": {
+      "build": { "action": "build" },
+      "approve": { "signal": "approval" },
+      "denied": { "error": { "code": "review.denied", "message": "Denied" } }
+    }
+  },
+  "expect": {
+    "definition": {
+      "language": "swl",
+      "name": "review",
+      "start": "build",
+      "actions": { "build": { "effect": "idempotent", "outcomes": ["ok"] } },
+      "nodes": {
+        "build": { "kind": "activity", "action": "build", "routes": { "ok": "approve", "failed": "denied" } },
+        "approve": { "kind": "await-signal", "signal": "approval", "routes": { "approved": "done", "rejected": "denied" } },
+        "done": { "kind": "complete" },
+        "denied": { "kind": "fail", "error": { "code": "review.denied", "message": "Denied" } }
+      }
+    }
+  }
+}

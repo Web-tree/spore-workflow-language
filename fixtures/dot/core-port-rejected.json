@@ -1,0 +1,9 @@
+{
+  "fixture": "dot",
+  "title": "A port on an edge is rejected rather than guessed at",
+  "spec": "notation §2",
+  "profiles": ["core"],
+  "source": "digraph \"ports\" {\n  start = \"a\";\n  done [kind=\"complete\"];\n  a -> done:in;\n}\n",
+  "settings": { "actions": { "a": { "effect": "pure", "outcomes": ["ok"] } }, "nodes": { "a": { "action": "a" } } },
+  "expect": { "rejected": true }
+}

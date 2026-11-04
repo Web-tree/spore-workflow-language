@@ -1,0 +1,9 @@
+{
+  "fixture": "dot",
+  "title": "An attribute that is neither semantic nor on the presentation allowlist is rejected",
+  "spec": "notation §3",
+  "profiles": ["core"],
+  "source": "digraph \"hello\" {\n  start = \"greet\";\n  greet [kind=\"activity\", retries=\"3\"];\n  done [kind=\"complete\"];\n  greet -> done;\n}\n",
+  "settings": { "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } }, "nodes": { "greet": { "action": "greet" } } },
+  "expect": { "rejected": true }
+}

@@ -41,7 +41,7 @@ These names are **draft design targets**, not claims that all corresponding exec
 
 ## 4. Verification
 
-The first official suite should include valid/invalid definition fixtures, DOT parse cases, trace fixtures, rejected feature declarations and action-contract errors, plus recovery fault injection for stateful hosts. Tests SHOULD cover ambiguous edge cases: explicit vs default outcomes; missing vs null values; unknown effect result; stale completion; retries after crashes; timers; cancellation races; safe migration fences.
+The fixture format is defined in [Fixtures](fixtures.md), and the suite lives in [`fixtures/`](../fixtures/). The first official suite should include valid/invalid definition fixtures, DOT parse cases, trace fixtures, rejected feature declarations and action-contract errors, plus recovery fault injection for stateful hosts. Tests SHOULD cover ambiguous edge cases: explicit vs default outcomes; missing vs null values; unknown effect result; stale completion; retries after crashes; timers; cancellation races; safe migration fences.
 
 A non-Rust implementation must derive expected behavior from the published spec and fixtures, rather than call Runspore's reducer and claim independence.
 

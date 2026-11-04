@@ -1,0 +1,25 @@
+{
+  "fixture": "trace",
+  "title": "Another outcome resets the streak, so the limited outcome gets its full allowance again",
+  "spec": "execution §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "loop",
+    "start": "check",
+    "requires": ["core"],
+    "actions": { "check": { "effect": "pure", "outcomes": ["red", "amber", "ok"] } },
+    "nodes": {
+      "check": { "kind": "activity", "action": "check", "loopLimits": { "red": 1 }, "routes": { "red": "check", "amber": "check", "ok": "done", "exhausted": "stop" } },
+      "done": { "kind": "complete" },
+      "stop": { "kind": "fail", "error": { "code": "check.exhausted", "message": "Still red" } }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r8" }, "expect": { "positions": ["check"] } },
+    { "event": { "type": "result", "invocation": { "node": "check", "visit": 1 }, "status": "success", "outcome": "red" }, "expect": { "status": "running", "positions": ["check"] } },
+    { "event": { "type": "result", "invocation": { "node": "check", "visit": 2 }, "status": "success", "outcome": "amber" }, "expect": { "status": "running", "positions": ["check"] } },
+    { "event": { "type": "result", "invocation": { "node": "check", "visit": 3 }, "status": "success", "outcome": "red" }, "expect": { "status": "running", "positions": ["check"] } },
+    { "event": { "type": "result", "invocation": { "node": "check", "visit": 4 }, "status": "success", "outcome": "red" }, "expect": { "status": "failed", "diagnostics": ["loop.exhausted"], "error": { "code": "check.exhausted" } } }
+  ]
+}

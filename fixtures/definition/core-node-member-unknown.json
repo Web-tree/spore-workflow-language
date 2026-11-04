@@ -1,0 +1,17 @@
+{
+  "fixture": "definition",
+  "title": "A member the node's kind doesn't define is rejected, so new features fail closed",
+  "spec": "definition §3; schemas/definition.schema.json",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "join": "all", "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "expect": { "errors": ["node.member"] }
+}

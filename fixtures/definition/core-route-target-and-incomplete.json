@@ -1,0 +1,17 @@
+{
+  "fixture": "definition",
+  "title": "A route to a missing node and a declared outcome with no route are both reported",
+  "spec": "definition §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "bad": "nowhere" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "expect": { "errors": ["route.target", "route.incomplete"] }
+}

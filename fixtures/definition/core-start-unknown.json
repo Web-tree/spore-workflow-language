@@ -1,0 +1,17 @@
+{
+  "fixture": "definition",
+  "title": "A start that names no node is rejected",
+  "spec": "definition §2",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "nowhere",
+    "actions": { "greet": { "effect": "read-only", "outcomes": ["ok"] } },
+    "nodes": {
+      "greet": { "kind": "activity", "action": "greet", "routes": { "ok": "done" } },
+      "done": { "kind": "complete" }
+    }
+  },
+  "expect": { "errors": ["start.unknown"] }
+}

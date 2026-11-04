@@ -1,0 +1,17 @@
+{
+  "fixture": "definition",
+  "title": "Nodes that can only loop between themselves, with no path to a terminal, are rejected",
+  "spec": "definition §3",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "spin",
+    "start": "a",
+    "actions": { "step": { "effect": "pure", "outcomes": ["ok"] } },
+    "nodes": {
+      "a": { "kind": "activity", "action": "step", "routes": { "ok": "b" } },
+      "b": { "kind": "activity", "action": "step", "routes": { "ok": "a" } }
+    }
+  },
+  "expect": { "errors": ["graph.no-terminal"] }
+}

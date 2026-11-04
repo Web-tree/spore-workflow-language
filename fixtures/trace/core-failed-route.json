@@ -1,0 +1,32 @@
+{
+  "fixture": "trace",
+  "title": "A terminal operational failure takes the failed route, recording outcome failed on the node",
+  "spec": "execution §3, §4",
+  "profiles": ["core"],
+  "definition": {
+    "language": "swl",
+    "name": "approval",
+    "start": "prepare",
+    "requires": ["core"],
+    "actions": { "prepare": { "effect": "idempotent", "outcomes": ["ok"] } },
+    "nodes": {
+      "prepare": { "kind": "activity", "action": "prepare", "routes": { "ok": "review", "failed": "rejected" } },
+      "review": { "kind": "await-signal", "signal": "review", "routes": { "approved": "done", "rejected": "rejected" } },
+      "done": { "kind": "complete" },
+      "rejected": { "kind": "fail", "error": { "code": "approval.rejected", "message": "Not approved" } }
+    }
+  },
+  "steps": [
+    { "event": { "type": "start", "runId": "r4" }, "expect": { "status": "running", "positions": ["prepare"] } },
+    {
+      "event": { "type": "result", "invocation": { "node": "prepare", "visit": 1 }, "status": "failure", "error": "disk full", "retryable": false },
+      "expect": {
+        "status": "failed",
+        "positions": [],
+        "commands": [],
+        "nodes": { "prepare": { "visit": 1, "outcome": "failed", "output": { "error": "disk full" } } },
+        "error": { "code": "approval.rejected" }
+      }
+    }
+  ]
+}
