@@ -9,7 +9,7 @@ fixtures/
 └── trace/        # a definition, a sequence of events, and what each transition must produce
 ```
 
-File names start with the profile the fixture needs, then say what it checks: `core-loop-exhausted.json`. An implementation runs every fixture whose profiles it claims and reports the ones it skips. The TypeScript draft runs them from `implementations/typescript/test/fixtures.test.ts`.
+File names start with the profile the fixture needs, then say what it checks: `core-loop-exhausted.json`, `parallel-need-any-cancels-losers.json`. An implementation runs every fixture whose profiles it claims and reports the ones it skips. The TypeScript draft runs them from `implementations/typescript/test/fixtures.test.ts`.
 
 Check a fixture file's structure with `bunx ajv-cli@5 validate --spec=draft2020 -s schemas/fixture.schema.json -d "fixtures/*/*.json"` from the repository root.
 

@@ -1,0 +1,77 @@
+{
+  "fixture": "definition",
+  "title": "A complete node inside a region is rejected",
+  "spec": "parallel §3 P6",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "early",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "e",
+          "skip": "fin"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      },
+      "fin": {
+        "kind": "complete"
+      }
+    }
+  },
+  "expect": {
+    "errors": [
+      "parallel.p6"
+    ]
+  }
+}

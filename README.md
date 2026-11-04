@@ -13,6 +13,7 @@ SWL defines how workflow graphs, action interfaces, execution, and durable state
 | [Definition Model](spec/definition.md) | Workflow graph, nodes, action **interfaces**, bindings and capabilities | Editors, compilers, domain DSLs |
 | [SWL-DOT](spec/notation.md) | DOT-based human authoring representation | Graph editors, parsers |
 | [Execution Semantics](spec/execution.md) | Routing, state transitions, loops, errors, retries | Runtimes, simulators |
+| [The `parallel` profile](spec/parallel.md) | Splits, gathers, optional arrivals, failure across branches | Runtimes, validators |
 | [Invocation and Control](spec/invocation.md) | Sync/deferred work, events, signals, cancellation | Hosts, workers |
 | [Durability and State](spec/state.md) | Persistence guarantees, store provider, inspection/export | Durable hosts, inspectors |
 | [Distribution](spec/distribution.md) | Packages, referenced assets and identity | Build tools, registries |

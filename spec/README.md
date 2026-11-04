@@ -7,6 +7,7 @@ This directory is the **normative-design workspace** for the independent Spore W
 | Definition | [Definition Model](definition.md) |
 | Authoring | [SWL-DOT](notation.md) |
 | Runtime behavior | [Execution Semantics](execution.md) |
+| Branches | [The `parallel` profile](parallel.md) |
 | Integration | [Invocation and Control](invocation.md) |
 | State | [Durability and State](state.md) |
 | Packaging | [Distribution](distribution.md) |

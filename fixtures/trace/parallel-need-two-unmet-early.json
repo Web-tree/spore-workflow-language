@@ -1,0 +1,231 @@
+{
+  "fixture": "trace",
+  "title": "A drop records no arrival and no visit; when the need can no longer be met the gather takes unmet without being entered, and the target reads who arrived",
+  "spec": "parallel §2, §4.4, §4.5, §4.7",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "maydrop",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c",
+            "d"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "e",
+          "skip": "none"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "e",
+          "skip": "none"
+        }
+      },
+      "d": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "e",
+          "skip": "none"
+        }
+      },
+      "none": {
+        "kind": "drop"
+      },
+      "e": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "done",
+          "unmet": "few"
+        },
+        "need": 2
+      },
+      "few": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "done"
+        },
+        "input": {
+          "from": {
+            "$get": [
+              "from"
+            ]
+          },
+          "arrivals": {
+            "$get": [
+              "nodes",
+              "e",
+              "arrivals"
+            ]
+          }
+        }
+      },
+      "done": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p5"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c",
+          "d"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "skip"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "c",
+          "d"
+        ],
+        "commands": [],
+        "nodes": {
+          "b": {
+            "visit": 1,
+            "outcome": "skip",
+            "output": null
+          }
+        }
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "skip"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "few"
+        ],
+        "commands": [
+          {
+            "type": "cancel",
+            "invocation": {
+              "node": "d",
+              "visit": 1
+            }
+          },
+          {
+            "type": "invoke",
+            "node": "few",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": {
+              "from": {
+                "node": "e",
+                "outcome": "unmet",
+                "output": null
+              },
+              "arrivals": {
+                "b": null,
+                "c": null
+              }
+            },
+            "params": null
+          }
+        ],
+        "nodes": {
+          "e": {
+            "visit": 0,
+            "outcome": "unmet",
+            "output": null,
+            "arrivals": {
+              "b": null,
+              "c": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "few",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "completed"
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "fixture": "trace",
+  "title": "Cancelling a run whose unsafe invocation is running sends the cancel command but holds the run stopping until the result is known",
+  "spec": "execution §5; invocation §5",
+  "profiles": [
+    "core"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "hello",
+    "start": "greet",
+    "requires": [
+      "core"
+    ],
+    "actions": {
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "greet": {
+        "kind": "activity",
+        "action": "write",
+        "routes": {
+          "ok": "done"
+        }
+      },
+      "done": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "c4"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "cancel"
+      },
+      "expect": {
+        "status": "stopping",
+        "positions": [
+          "greet"
+        ],
+        "commands": [
+          {
+            "type": "cancel",
+            "invocation": {
+              "node": "greet",
+              "visit": 1
+            }
+          }
+        ],
+        "diagnostics": [
+          "run.cancel-requested"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "greet",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok",
+        "output": {
+          "receipt": "A1"
+        }
+      },
+      "expect": {
+        "status": "cancelled",
+        "positions": [],
+        "commands": [],
+        "nodes": {
+          "greet": {
+            "visit": 1,
+            "outcome": "ok",
+            "output": {
+              "receipt": "A1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "event": {
+        "type": "cancel"
+      },
+      "expect": {
+        "status": "cancelled",
+        "commands": [],
+        "diagnostics": [
+          "event.ignored-terminal"
+        ]
+      }
+    }
+  ]
+}

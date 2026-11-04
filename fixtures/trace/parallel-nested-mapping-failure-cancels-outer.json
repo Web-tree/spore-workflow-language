@@ -1,0 +1,142 @@
+{
+  "fixture": "trace",
+  "title": "When entering any target of a split fails, the split emits no invoke command and the run fails, cancelling the open branches of the enclosing split",
+  "spec": "parallel §4.2, §5",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "nested",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b1",
+            "b2"
+          ]
+        }
+      },
+      "b1": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "bg"
+        }
+      },
+      "b2": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "bg"
+        },
+        "input": {
+          "$get": [
+            "input",
+            "missing"
+          ]
+        }
+      },
+      "bg": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete",
+        "output": {
+          "$get": [
+            "arrivals"
+          ]
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p13"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "failed",
+        "positions": [],
+        "commands": [
+          {
+            "type": "cancel",
+            "invocation": {
+              "node": "c",
+              "visit": 1
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

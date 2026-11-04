@@ -14,6 +14,8 @@ The graph's name and graph-specific fields `start`, `kind` and `on` are authorit
 
 Accepted constructs are: one named `digraph`, graph assignments `start = "step";`, node declarations `step [kind="activity"];`, directed edges `a -> b [on="ok"];`, edge chains `a -> b -> c;`, quoted and simple bare IDs, and DOT line/block comments.
 
+With the [`parallel`](parallel.md) profile, either side of an arrow may be an unnamed, attribute-free group of node IDs. Per the [DOT language](https://graphviz.org/doc/info/lang.html), `a -> {b c}` is `a -> b` and `a -> c`; a parser normalizes it to one route whose value is the array `["b", "c"]`, sorted and without duplicates: a split. A group on the left, `{b c} -> d`, is two ordinary edges. A chain may contain a group, so `a -> {b c} -> d` is a split at `a` whose two branches both route to `d`. Two separate edges from one node with the same outcome, `a -> b; a -> c`, remain a duplicate-route error, so a forgotten `on="failed"` can't turn into a split by accident. Named subgraphs, clusters, nested groups, attributes or statements inside a group, and ports stay rejected.
+
 The default node kind is `activity`. The default edge outcome is `ok`. An `await-signal` node uses named events (often `received` or an explicit business outcome), and terminal nodes use `complete` or `fail`. Edges route named outcomes—not evaluation of an arbitrary string label.
 
 Source profiles MUST reject ambiguous unsupported DOT constructs such as undirected graphs, ports and subgraphs, rather than guess their control-flow meaning. A conformant extended frontend may accept more DOT syntax only when its normalization is unambiguous and it advertises that extension.
@@ -40,10 +42,12 @@ The `label` values above have no execution meaning. A tool must not infer an act
 | Location | Semantic attribute | Meaning |
 | --- | --- | --- |
 | graph | `start` | Required node ID |
-| node | `kind` | `activity` (default), `await-signal`, `complete`, `fail` |
+| node | `kind` | `activity` (default), `await-signal`, `complete`, `fail`; with `parallel`, also `drop` |
+| node | `need`, `losers` | With `parallel`: the gather members of parallel §2. A numeric `need` normalizes to an integer |
 | edge | `on` | Named outcome; `ok` if omitted |
+| edge | `optional` | With `parallel`: `true` on an arrow from a branch into its gather marks that branch's arrival optional. It normalizes to the gather's `optional` list. Every arrow from one branch into the gather must agree |
 
-Graphviz-only rendering attributes may be accepted from an explicit allowlist and discarded during semantic normalization. Unknown **semantic** attributes, conflicting repeated declarations, unknown target nodes, duplicate outgoing outcomes and unsupported required extensions MUST be errors. Namespaced presentation extensions may be retained without becoming control-flow rules.
+Graphviz-only rendering attributes may be accepted from an explicit allowlist and discarded during semantic normalization. Unknown **semantic** attributes, conflicting repeated declarations, unknown target nodes, duplicate outgoing outcomes and unsupported required extensions MUST be errors. Namespaced presentation extensions may be retained without becoming control-flow rules. Like `kind` and `on`, the attributes `need`, `losers` and `optional` are authoritative in DOT, and `settings.json` MUST NOT supply them.
 
 The initial notation profile intentionally does **not** require a legacy Runspore `dialect` marker. Existing Runspore workflows need an explicit compatibility/migration adapter; claiming that an unmodified Runspore parser accepts SWL-DOT is incorrect.
 

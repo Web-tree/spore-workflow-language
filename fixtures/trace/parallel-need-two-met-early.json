@@ -1,0 +1,152 @@
+{
+  "fixture": "trace",
+  "title": "A numeric need is met by that many arrivals; the branch still running is a loser and is absent from arrivals",
+  "spec": "parallel §4.5, §4.6",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "three",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c",
+            "d"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "d": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete",
+        "output": {
+          "$get": [
+            "arrivals"
+          ]
+        },
+        "need": 2
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p4"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c",
+          "d"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "b",
+          "d"
+        ],
+        "commands": []
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "d",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok",
+        "output": 4
+      },
+      "expect": {
+        "status": "completed",
+        "positions": [],
+        "commands": [
+          {
+            "type": "cancel",
+            "invocation": {
+              "node": "b",
+              "visit": 1
+            }
+          }
+        ],
+        "result": {
+          "c": {
+            "outcome": "ok",
+            "output": null
+          },
+          "d": {
+            "outcome": "ok",
+            "output": 4
+          }
+        }
+      }
+    }
+  ]
+}

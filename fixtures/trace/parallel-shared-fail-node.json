@@ -1,0 +1,129 @@
+{
+  "fixture": "trace",
+  "title": "A fail node may be reached from inside and outside a split; reaching it from a branch fails the run and cancels the other branches",
+  "spec": "parallel §3, §5",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "sharedfail",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ],
+          "failed": "bad"
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e",
+          "failed": "bad"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      },
+      "bad": {
+        "kind": "fail",
+        "error": {
+          "code": "bad",
+          "message": "Something went wrong"
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p10"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "failure",
+        "error": "boom",
+        "retryable": false
+      },
+      "expect": {
+        "status": "failed",
+        "positions": [],
+        "commands": [
+          {
+            "type": "cancel",
+            "invocation": {
+              "node": "c",
+              "visit": 1
+            }
+          }
+        ],
+        "error": {
+          "code": "bad"
+        },
+        "nodes": {
+          "b": {
+            "visit": 1,
+            "outcome": "failed",
+            "output": {
+              "error": "boom"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

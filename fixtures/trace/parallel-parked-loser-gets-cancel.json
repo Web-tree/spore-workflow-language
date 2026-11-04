@@ -1,0 +1,146 @@
+{
+  "fixture": "trace",
+  "title": "A branch parked on an unknown result is open: when the gather decides without it, it gets a cancel command like any other loser",
+  "spec": "parallel §4.6, §4.10",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "two",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "done"
+        },
+        "need": "any"
+      },
+      "done": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p25"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "unknown"
+      },
+      "expect": {
+        "status": "needs-intervention",
+        "positions": [
+          "b",
+          "c"
+        ],
+        "diagnostics": [
+          "invocation.unknown"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "e"
+        ],
+        "commands": [
+          {
+            "type": "cancel",
+            "invocation": {
+              "node": "b",
+              "visit": 1
+            }
+          },
+          {
+            "type": "invoke",
+            "node": "e",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    }
+  ]
+}

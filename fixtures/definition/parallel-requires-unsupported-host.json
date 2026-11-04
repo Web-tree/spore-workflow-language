@@ -1,0 +1,75 @@
+{
+  "fixture": "definition",
+  "title": "A host that does not support parallel rejects the definition before any command",
+  "spec": "definition §2, §6",
+  "profiles": [
+    "core"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "two",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      }
+    }
+  },
+  "supported": [
+    "core"
+  ],
+  "expect": {
+    "errors": [
+      "requires.unsupported"
+    ]
+  }
+}

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Web-tree/spore-workflow-language/blob/main/schemas/definition.schema.json",
   "title": "SWL draft normalized workflow definition",
-  "description": "Structural validation only. Cross-reference, graph and capability checks are normative in spec/definition.md.",
+  "description": "Structural validation only. Cross-reference, graph and capability checks are normative in spec/definition.md; the parallel profile's shape rules in spec/parallel.md.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -83,7 +83,7 @@
         "$ref": "#/$defs/outcome"
       },
       "additionalProperties": {
-        "$ref": "#/$defs/id"
+        "$ref": "#/$defs/target"
       }
     },
     "action": {
@@ -172,6 +172,36 @@
                 "type": "integer",
                 "minimum": 1
               }
+            },
+            "need": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "all",
+                    "any"
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ],
+              "description": "Gather only (parallel profile)."
+            },
+            "optional": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "description": "Gather only (parallel profile)."
+            },
+            "losers": {
+              "enum": [
+                "stop",
+                "wait"
+              ],
+              "description": "Gather only (parallel profile)."
             }
           }
         },
@@ -201,6 +231,36 @@
                 "type": "integer",
                 "minimum": 1
               }
+            },
+            "need": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "all",
+                    "any"
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ],
+              "description": "Gather only (parallel profile)."
+            },
+            "optional": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "description": "Gather only (parallel profile)."
+            },
+            "losers": {
+              "enum": [
+                "stop",
+                "wait"
+              ],
+              "description": "Gather only (parallel profile)."
             }
           }
         },
@@ -216,6 +276,36 @@
             },
             "output": {
               "$ref": "#/$defs/mapping"
+            },
+            "need": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "all",
+                    "any"
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ],
+              "description": "Gather only (parallel profile)."
+            },
+            "optional": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "description": "Gather only (parallel profile)."
+            },
+            "losers": {
+              "enum": [
+                "stop",
+                "wait"
+              ],
+              "description": "Gather only (parallel profile)."
             }
           }
         },
@@ -247,8 +337,67 @@
                   "minLength": 1
                 }
               }
+            },
+            "need": {
+              "oneOf": [
+                {
+                  "enum": [
+                    "all",
+                    "any"
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ],
+              "description": "Gather only (parallel profile)."
+            },
+            "optional": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "description": "Gather only (parallel profile)."
+            },
+            "losers": {
+              "enum": [
+                "stop",
+                "wait"
+              ],
+              "description": "Gather only (parallel profile)."
             }
           }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "const": "drop"
+            }
+          },
+          "description": "Ends a branch with no arrival (parallel profile)."
+        }
+      ]
+    },
+    "target": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/id"
+        },
+        {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "A split (parallel profile): the branches start together."
         }
       ]
     }

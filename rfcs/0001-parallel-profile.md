@@ -1,6 +1,6 @@
 # RFC 0001: the `parallel` profile
 
-**Status:** Accepted on 2026-11-04 as the direction for the `parallel` profile. Nothing here is normative until the spec text and fixtures land together (GOVERNANCE.md step 4), and no release follows until an independent implementation has run it (step 5). **Issue:** [#6](https://github.com/Web-tree/spore-workflow-language/issues/6). **Against:** draft commit `eecc69e`.
+**Status:** Accepted on 2026-11-04 as the direction for the `parallel` profile. The normative text is [spec/parallel.md](../spec/parallel.md) with the `parallel-*` fixtures (GOVERNANCE.md step 4); where this RFC and the spec differ, the spec wins. No release follows until an independent implementation has run it (step 5). **Issue:** [#6](https://github.com/Web-tree/spore-workflow-language/issues/6). **Against:** draft commit `eecc69e`.
 
 This RFC follows step 2 of [GOVERNANCE.md](../GOVERNANCE.md): scope, normative behavior, compatibility, security, and positive and negative tests. Nothing has been implemented or run. Every name it introduces (`need`, `optional`, `losers`, `drop`, `unmet`, `arrivals`, `stopping`) is a working name, and the rules are expected to change once an implementation produces traces.
 

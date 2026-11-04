@@ -1,0 +1,104 @@
+{
+  "fixture": "dot",
+  "title": "optional=true on the arrow into the gather normalizes to the gather's optional list; a drop node has the kind drop",
+  "spec": "notation §3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "source": "digraph \"ci\" {\n  start = \"a\";\n  a -> {b c};\n  b -> e;\n  c -> e [optional=true];\n  c -> none [on=\"skip\"];\n  none [kind=\"drop\"];\n  e [kind=\"complete\"];\n}\n",
+  "settings": {
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "action": "step"
+      },
+      "b": {
+        "action": "step"
+      },
+      "c": {
+        "action": "pick"
+      }
+    }
+  },
+  "expect": {
+    "definition": {
+      "language": "swl",
+      "name": "ci",
+      "start": "a",
+      "requires": [
+        "core",
+        "parallel"
+      ],
+      "actions": {
+        "step": {
+          "effect": "read-only",
+          "outcomes": [
+            "ok"
+          ]
+        },
+        "pick": {
+          "effect": "pure",
+          "outcomes": [
+            "ok",
+            "skip"
+          ]
+        }
+      },
+      "nodes": {
+        "a": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": [
+              "b",
+              "c"
+            ]
+          }
+        },
+        "b": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "e"
+          }
+        },
+        "c": {
+          "kind": "activity",
+          "action": "pick",
+          "routes": {
+            "ok": "e",
+            "skip": "none"
+          }
+        },
+        "none": {
+          "kind": "drop"
+        },
+        "e": {
+          "kind": "complete",
+          "optional": [
+            "c"
+          ]
+        }
+      }
+    }
+  }
+}

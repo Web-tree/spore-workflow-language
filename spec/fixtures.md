@@ -62,11 +62,11 @@ An **invocation reference** is `{ "node": <id>, "visit": <n> }`: the logical inv
 
 | Member | Compared how |
 | --- | --- |
-| `status` | Equal |
-| `positions` | Array of node IDs with an active position, in ascending order. Equal. In `core` it has zero or one entry |
+| `status` | Equal. One of `running`, `waiting`, `needs-intervention`, `stopping`, `completed`, `failed`, `cancelled` |
+| `positions` | Array of node IDs with an active position, in ascending order. Equal. In `core` it has zero or one entry; with `parallel`, one per open branch |
 | `commands` | Array of portable commands in emission order. Equal |
 | `diagnostics` | Every listed diagnostic is reported. More may be |
-| `nodes` | For each listed node ID, its latest record `{ visit, outcome, output }` is equal |
+| `nodes` | For each listed node ID, its latest record is equal: `{ visit, outcome, output }`, plus `arrivals` on a gather, or `{ visit, arrivals }` for a gather that has been entered and not yet routed (parallel §2) |
 | `result` | Equal, `null` when the run has none |
 | `error` | `code` equal; `message` equal when the fixture gives one |
 
@@ -115,7 +115,9 @@ Validation error codes and diagnostics have the form `<area>.<problem>`: lowerca
 | `graph.unreachable` | A node with no path from `start` | definition §3 |
 | `graph.no-terminal` | A node with no path to a terminal | definition §3 |
 
-**Diagnostics used by the `core` fixtures:** `event.duplicate-start`, `event.ignored-terminal`, `signal.unmatched`, `result.stale`, `invocation.unknown`, `loop.exhausted`, `run.cancel-requested`.
+**Validation errors in `parallel`:** `parallel.p1` to `parallel.p15`, one per rule of the table in parallel §3. A definition that requires `parallel` on a validator without it reports the core `requires.unsupported`.
+
+**Diagnostics used by the fixtures:** `event.duplicate-start`, `event.ignored-terminal`, `signal.unmatched`, `result.stale`, `invocation.unknown`, `loop.exhausted`, `run.cancel-requested`, and `run.cancel-ignored` for a cancel during `stopping` (execution §5).
 
 **Not yet defined:** the `error.code` a run carries when it ends `failed` for an operational reason (no `failed` route, a mapping error, a limit). The core fixtures assert `status` there and leave `error` alone until execution §3 names those codes.
 

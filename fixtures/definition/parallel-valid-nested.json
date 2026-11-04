@@ -1,0 +1,95 @@
+{
+  "fixture": "definition",
+  "title": "A nested split with its own gather inside the outer branch is valid",
+  "spec": "parallel §3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "nested",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b1",
+            "b2"
+          ]
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      },
+      "b1": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "bg"
+        }
+      },
+      "b2": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "bg"
+        }
+      },
+      "bg": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      }
+    }
+  },
+  "expect": {
+    "valid": true
+  }
+}

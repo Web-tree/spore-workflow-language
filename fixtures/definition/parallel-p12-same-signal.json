@@ -1,0 +1,73 @@
+{
+  "fixture": "definition",
+  "title": "Two regions of one split may not wait on the same signal name",
+  "spec": "parallel §3 P12",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "signals",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "await-signal",
+        "signal": "review",
+        "routes": {
+          "approved": "e"
+        }
+      },
+      "c": {
+        "kind": "await-signal",
+        "signal": "review",
+        "routes": {
+          "approved": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      }
+    }
+  },
+  "expect": {
+    "errors": [
+      "parallel.p12"
+    ]
+  }
+}
