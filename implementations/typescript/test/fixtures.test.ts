@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { compileDot, transition, validateDefinition } from "../src/index";
+import { CLAIMED_PROFILES, compileDot, transition, validateDefinition } from "../src/index";
 import type { Command, Definition, Event, Json, RunState } from "../src/index";
 
 /** Runs the repository's conformance fixtures (spec/fixtures.md) against this implementation. */
 
 const ROOT = join(import.meta.dir, "..", "..", "..", "fixtures");
-const CLAIMED = ["core"];
+const CLAIMED = CLAIMED_PROFILES;
 
 interface Fixture { name: string; fixture: string; title: string; profiles: string[]; [key: string]: unknown }
 interface Ref { node: string; visit: number }
@@ -82,7 +82,7 @@ function runTrace(f: Fixture): void {
       const commands = d.commands.map(c => portable(c, d.state));
       const x = step.expect;
       if ("status" in x) expect(d.state.status).toBe(x.status as RunState["status"]);
-      if ("positions" in x) expect(d.state.position ? [d.state.position] : []).toEqual(x.positions as string[]);
+      if ("positions" in x) expect(d.state.positions.map(p => p.node).sort()).toEqual(x.positions as string[]);
       if ("commands" in x) expect(commands).toEqual(x.commands as Json[]);
       if ("diagnostics" in x) for (const g of x.diagnostics as string[]) expect(d.diagnostics).toContain(g);
       if ("nodes" in x) for (const [id, record] of Object.entries(x.nodes as Record<string, unknown>)) expect(d.state.nodes[id]).toEqual(record as RunState["nodes"][string]);
