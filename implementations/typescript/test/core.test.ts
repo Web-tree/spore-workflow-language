@@ -47,7 +47,7 @@ describe("independent sequential core",()=>{
     const d:Definition=structuredClone(hello);d.actions!.greet.retry={maxAttempts:2};
     const start=transition(d,null,{type:"start",runId:"three"});
     const next=transition(d,start.state,{type:"result",invocationId:"three:greet:1",status:"unknown"});
-    expect(next.state.invocation?.attempt).toBe(2);
+    expect(next.state.positions[0]?.invocation?.attempt).toBe(2);
     expect(next.commands[0]).toMatchObject({type:"invoke",invocationId:"three:greet:1",attempt:2,idempotencyKey:"three:greet:1"});
     expect(transition(d,next.state,{type:"result",invocationId:"three:greet:1",status:"unknown"}).state.status).toBe("needs-intervention");
   });
@@ -64,7 +64,7 @@ describe("independent sequential core",()=>{
       nodes:{check:{kind:"activity",action:"check",loopLimits:{red:2},routes:{red:"check",ok:"done",exhausted:"stop"}},done:{kind:"complete"},stop:{kind:"fail",error:{code:"exhausted",message:"stopped"}}}};
     let x=transition(d,null,{type:"start",runId:"loop"});
     x=transition(d,x.state,{type:"result",invocationId:"loop:check:1",status:"success",outcome:"red"});
-    expect(x.state.invocation?.id).toBe("loop:check:2");
+    expect(x.state.positions[0]?.invocation?.id).toBe("loop:check:2");
     x=transition(d,x.state,{type:"result",invocationId:"loop:check:2",status:"success",outcome:"red"});
     x=transition(d,x.state,{type:"result",invocationId:"loop:check:3",status:"success",outcome:"red"});
     expect(x.state.status).toBe("failed");
@@ -78,11 +78,11 @@ describe("independent sequential core",()=>{
     expect(codes).toContain("route.incomplete");
   });
   test("rejects unsupported required profiles",()=>{
-    const d:Definition=structuredClone(hello);d.requires=["core","parallel"];
+    const d:Definition=structuredClone(hello);d.requires=["core","timers"];
     expect(validateDefinition(d).map(e=>e.code)).toContain("requires.unsupported");
   });
   test("rejects unknown members, which the schema already did",()=>{
-    const d:Definition=structuredClone(hello);(d.nodes.greet as Record<string,unknown>).join="all";
+    const d:Definition=structuredClone(hello);(d.nodes.greet as unknown as Record<string,unknown>).join="all";
     expect(validateDefinition(d).map(e=>e.code)).toContain("node.member");
   });
   test("reports a null action instead of throwing",()=>{
