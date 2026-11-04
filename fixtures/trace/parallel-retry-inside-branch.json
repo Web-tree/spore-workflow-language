@@ -1,0 +1,177 @@
+{
+  "fixture": "trace",
+  "title": "A retry inside a branch is the same logical invocation and the branch still produces one arrival",
+  "spec": "parallel §4.3, §4.11; execution §4",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "retry",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "flaky": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ],
+        "retry": {
+          "maxAttempts": 2
+        }
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "flaky",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete",
+        "output": {
+          "$get": [
+            "arrivals"
+          ]
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p11"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "failure",
+        "error": "timeout",
+        "retryable": true
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "b",
+          "c"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "b",
+            "visit": 1,
+            "attempt": 2,
+            "action": "flaky",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok",
+        "output": "B"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "c"
+        ],
+        "commands": [],
+        "nodes": {
+          "b": {
+            "visit": 1,
+            "outcome": "ok",
+            "output": "B"
+          }
+        }
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "completed",
+        "result": {
+          "b": {
+            "outcome": "ok",
+            "output": "B"
+          },
+          "c": {
+            "outcome": "ok",
+            "output": null
+          }
+        }
+      }
+    }
+  ]
+}

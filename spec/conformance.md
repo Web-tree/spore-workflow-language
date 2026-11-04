@@ -30,11 +30,15 @@ Equivalent observable traces do **not** mean private database bytes or Temporal 
 
 ## 3. Feature profiles (candidates)
 
-`core` is sequential execution with activity, await-signal, complete/fail, named routes, explicit failures and basic mapping. Other independently declared capabilities may include:
+`core` is sequential execution with activity, await-signal, complete/fail, named routes, explicit failures and basic mapping.
+
+`parallel` is splits, gathers found by graph shape, optional arrivals, `drop` nodes and failure across branches, specified in [parallel.md](parallel.md) with the `parallel-*` fixtures. It requires `core`.
+
+Other independently declared capabilities may include:
 
 - `buffered-signals` and `timers`;
 - `deferred-actions` and `tracked-updates`;
-- `parallel`, `subworkflows` and `compensation`;
+- `subworkflows` and `compensation`;
 - `expressions-jsonlogic`, `state-export` and `store-provider`.
 
 These names are **draft design targets**, not claims that all corresponding execution algorithms have been specified. A feature name without normative rules and positive/negative fixtures is not conformant.

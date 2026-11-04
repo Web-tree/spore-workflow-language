@@ -1,0 +1,41 @@
+{
+  "fixture": "dot",
+  "title": "A branch with several arrows into the gather must mark all or none of them optional",
+  "spec": "notation §2, §3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "source": "digraph \"ci\" {\n  start = \"a\";\n  a -> {b c};\n  b -> e;\n  c -> e [optional=true];\n  c -> e [on=\"skip\"];\n  c -> none [on=\"other\"];\n  none [kind=\"drop\"];\n  e [kind=\"complete\"];\n}\n",
+  "settings": {
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "action": "step"
+      },
+      "b": {
+        "action": "step"
+      },
+      "c": {
+        "action": "step"
+      },
+      "e": {
+        "action": "step"
+      }
+    }
+  },
+  "expect": {
+    "rejected": true
+  }
+}

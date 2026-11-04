@@ -23,7 +23,7 @@ An **activity** names an action contract, but it is not itself a command. A grap
 | `limits` | optional | Host-independent safety caps; default 16 visits per node, 256 activations |
 | `inputSchema` | optional | JSON Schema for workflow inputs |
 
-IDs use `[A-Za-z_][A-Za-z0-9_-]{0,63}`. Outcome names use `[a-z][a-z0-9-]{0,63}` except reserved `failed` and `exhausted`. UTF-8 presentation labels may differ from IDs. Unknown required semantics MUST be rejected before side effects.
+IDs use `[A-Za-z_][A-Za-z0-9_-]{0,63}`. Outcome names use `[a-z][a-z0-9-]{0,63}` except the reserved `failed`, `exhausted` and `unmet` (the last is taken only by the [`parallel`](parallel.md) profile). UTF-8 presentation labels may differ from IDs. Unknown required semantics MUST be rejected before side effects.
 
 ## 3. Node kinds
 
@@ -33,12 +33,13 @@ IDs use `[A-Za-z_][A-Za-z0-9_-]{0,63}`. Outcome names use `[a-z][a-z0-9-]{0,63}`
 | `await-signal` | `signal`, nonempty `routes` | Suspends until a matching signal is accepted |
 | `complete` | none | Ends successfully, evaluating optional `output` mapping |
 | `fail` | `error` (code, message) | Ends with a business failure |
+| `drop` | none | Ends one branch of a split with no arrival. Only with the [`parallel`](parallel.md) profile |
 
-Every outgoing `routes` member maps a named outcome to an existing target node. Nonterminal activity nodes MUST route every action-declared business outcome. Failure routing uses the reserved `failed` key; it is not an action-declared business outcome. An `exhausted` route is required exactly when `loopLimits` is present and permits controlled escape from a cycle. Terminal nodes MUST NOT have routes. Duplicate outcome keys are invalid.
+Every outgoing `routes` member maps a named outcome to an existing target node. With the `parallel` profile a route value may instead be an array of two or more node IDs, a split; its gather may carry the members `need`, `optional` and `losers`, on any kind. Nonterminal activity nodes MUST route every action-declared business outcome. Failure routing uses the reserved `failed` key; it is not an action-declared business outcome. An `exhausted` route is required exactly when `loopLimits` is present and permits controlled escape from a cycle. Terminal nodes MUST NOT have routes. Duplicate outcome keys are invalid.
 
 `loopLimits` maps a node outcome to a positive integer: how many consecutive occurrences may route normally. The next occurrence routes `exhausted`. The workflow-wide visit cap is a safety boundary, not a business route.
 
-Every node MUST be reachable from `start`. From every node there MUST exist a graph path to a terminal. This is *structural* reachability; a reachable terminal is not guaranteed to be taken at runtime.
+Every node MUST be reachable from `start`. From every node there MUST exist a graph path to a terminal. This is *structural* reachability; a reachable terminal is not guaranteed to be taken at runtime. Inside a branch of a split, a path to the gather, a `fail` node or a `drop` node satisfies this, and a `drop` node itself is exempt (parallel §3).
 
 ## 4. Action interfaces versus bindings
 
@@ -76,7 +77,7 @@ The mandatory minimal expression profile supports JSON values plus:
 - `{"$get":["input","task"]}`: copy a value at a path through the evaluation context;
 - `{"$literal":{"$get":["input","task"]}}`: return nested data without evaluating it.
 
-A path begins with `input`, `nodes`, `from` or `run`. Path segments are object keys or nonnegative array indexes. Missing paths are errors, not silently null. The context contains initial input, latest result per node (`{outcome,output,visit}`), the incoming route (`from`, or null at start), and an immutable run identity.
+A path begins with `input`, `nodes`, `from` or `run`, or with `arrivals` at a gather (parallel §2). Path segments are object keys or nonnegative array indexes. Missing paths are errors, not silently null. The context contains initial input, latest result per node (`{outcome,output,visit}`, plus `arrivals` on a gather), the incoming route (`from`: the node, outcome and output of the route that was taken, or null at `start` and at a gather), and an immutable run identity.
 
 There is no implicit JavaScript evaluation, truthiness or mutable global context. Conditionals, joins, JSON Logic and further operators belong to explicit optional expression profiles with separate fixtures. JSON Schema dialect and numeric-domain compatibility must be declared rather than inferred.
 

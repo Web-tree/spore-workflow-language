@@ -1,0 +1,151 @@
+{
+  "fixture": "trace",
+  "title": "During stopping a retryable failure of the unsafe invocation gets no further attempt; it is recorded and the run ends",
+  "spec": "execution §5",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "unsafe",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "writeRetry": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ],
+        "retry": {
+          "maxAttempts": 3
+        }
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "writeRetry",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p21"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "failure",
+        "error": "boom",
+        "retryable": false
+      },
+      "expect": {
+        "status": "stopping",
+        "positions": [
+          "c"
+        ],
+        "commands": [
+          {
+            "type": "cancel",
+            "invocation": {
+              "node": "c",
+              "visit": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "failure",
+        "error": "timeout",
+        "retryable": true
+      },
+      "expect": {
+        "status": "failed",
+        "positions": [],
+        "commands": [],
+        "nodes": {
+          "c": {
+            "visit": 1,
+            "outcome": "failed",
+            "output": {
+              "error": "timeout"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

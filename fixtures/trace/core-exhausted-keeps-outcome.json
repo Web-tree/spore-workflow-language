@@ -1,0 +1,146 @@
+{
+  "fixture": "trace",
+  "title": "When a streak runs out, from.outcome at the exhausted target is the outcome the node produced; only the route says exhausted",
+  "spec": "execution §2, §3",
+  "profiles": [
+    "core"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "loop",
+    "start": "check",
+    "requires": [
+      "core"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "check": {
+        "effect": "pure",
+        "outcomes": [
+          "red",
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "check": {
+        "kind": "activity",
+        "action": "check",
+        "routes": {
+          "red": "check",
+          "ok": "done",
+          "exhausted": "stop"
+        },
+        "loopLimits": {
+          "red": 1
+        }
+      },
+      "stop": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "done"
+        },
+        "input": {
+          "$get": [
+            "from"
+          ]
+        }
+      },
+      "done": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "c2"
+      },
+      "expect": {
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "check",
+            "visit": 1,
+            "attempt": 1,
+            "action": "check",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "check",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "red"
+      },
+      "expect": {
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "check",
+            "visit": 2,
+            "attempt": 1,
+            "action": "check",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "check",
+          "visit": 2
+        },
+        "status": "success",
+        "outcome": "red"
+      },
+      "expect": {
+        "positions": [
+          "stop"
+        ],
+        "diagnostics": [
+          "loop.exhausted"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "stop",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": {
+              "node": "check",
+              "outcome": "red",
+              "output": null
+            },
+            "params": null
+          }
+        ],
+        "nodes": {
+          "check": {
+            "visit": 2,
+            "outcome": "red",
+            "output": null
+          }
+        }
+      }
+    }
+  ]
+}

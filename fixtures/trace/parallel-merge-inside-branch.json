@@ -1,0 +1,198 @@
+{
+  "fixture": "trace",
+  "title": "A core merge inside a branch is unchanged: whichever route reaches the node enters it once, and from names that route",
+  "spec": "parallel §1; execution §2",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "merge",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "m",
+          "skip": "n"
+        }
+      },
+      "n": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "m"
+        }
+      },
+      "m": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        },
+        "input": {
+          "$get": [
+            "from",
+            "node"
+          ]
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p14"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "skip"
+      },
+      "expect": {
+        "positions": [
+          "c",
+          "n"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "n",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "n",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "c",
+          "m"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "m",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": "n",
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "m",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "c"
+        ],
+        "commands": []
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "completed"
+      }
+    }
+  ]
+}

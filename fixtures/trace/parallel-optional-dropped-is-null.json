@@ -1,0 +1,155 @@
+{
+  "fixture": "trace",
+  "title": "An optional branch still running holds the gather; once it drops, its arrival is null and the gather is met",
+  "spec": "parallel §2, §4.4, §4.5",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "optional",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "e",
+          "skip": "none"
+        }
+      },
+      "none": {
+        "kind": "drop"
+      },
+      "e": {
+        "kind": "complete",
+        "output": {
+          "$get": [
+            "arrivals"
+          ]
+        },
+        "optional": [
+          "c"
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p9"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "c"
+        ],
+        "commands": []
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "skip"
+      },
+      "expect": {
+        "status": "completed",
+        "positions": [],
+        "commands": [],
+        "result": {
+          "b": {
+            "outcome": "ok",
+            "output": null
+          },
+          "c": null
+        },
+        "nodes": {
+          "e": {
+            "visit": 1,
+            "arrivals": {
+              "b": {
+                "outcome": "ok",
+                "output": null
+              },
+              "c": null
+            }
+          }
+        }
+      }
+    }
+  ]
+}

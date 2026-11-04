@@ -1,0 +1,160 @@
+{
+  "fixture": "trace",
+  "title": "A failure while a sibling is parked on an unknown unsafe result keeps the run at needs-intervention; the resolution is recorded and then the run fails",
+  "spec": "parallel §4.10, §5; execution §5",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "unsafe",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "write",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p20"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "unknown"
+      },
+      "expect": {
+        "status": "needs-intervention",
+        "positions": [
+          "b",
+          "c"
+        ],
+        "commands": [],
+        "diagnostics": [
+          "invocation.unknown"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "failure",
+        "error": "boom",
+        "retryable": false
+      },
+      "expect": {
+        "status": "needs-intervention",
+        "positions": [
+          "c"
+        ],
+        "commands": [
+          {
+            "type": "cancel",
+            "invocation": {
+              "node": "c",
+              "visit": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "resolve",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "action": "complete",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "failed",
+        "positions": [],
+        "commands": [],
+        "nodes": {
+          "c": {
+            "visit": 1,
+            "outcome": "ok",
+            "output": null
+          }
+        }
+      }
+    }
+  ]
+}

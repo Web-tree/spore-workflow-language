@@ -57,7 +57,7 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                  "status": { "enum": ["running", "waiting", "needs-intervention", "completed", "failed", "cancelled"] },
+                  "status": { "enum": ["running", "waiting", "needs-intervention", "stopping", "completed", "failed", "cancelled"] },
                   "positions": { "type": "array", "items": { "type": "string" } },
                   "commands": { "type": "array", "items": { "$ref": "#/$defs/command" } },
                   "diagnostics": { "type": "array", "items": { "$ref": "#/$defs/code" } },

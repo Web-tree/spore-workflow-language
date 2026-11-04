@@ -1,0 +1,332 @@
+{
+  "fixture": "trace",
+  "title": "Re-entering a split is a new visit with no carry-over; a result from the previous visit is stale",
+  "spec": "parallel §4.11; execution §3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "two",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "check": {
+        "effect": "pure",
+        "outcomes": [
+          "again",
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "activity",
+        "action": "check",
+        "routes": {
+          "again": "a",
+          "ok": "done"
+        }
+      },
+      "done": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p16"
+      },
+      "expect": {
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "a",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "b",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          },
+          {
+            "type": "invoke",
+            "node": "c",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "e"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "e",
+            "visit": 1,
+            "attempt": 1,
+            "action": "check",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "e",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "again"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "a"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "a",
+            "visit": 2,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 2
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "b",
+            "visit": 2,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          },
+          {
+            "type": "invoke",
+            "node": "c",
+            "visit": 2,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ],
+        "commands": [],
+        "diagnostics": [
+          "result.stale"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 2
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "c"
+        ],
+        "nodes": {
+          "b": {
+            "visit": 2,
+            "outcome": "ok",
+            "output": null
+          }
+        }
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 2
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "e"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "e",
+            "visit": 2,
+            "attempt": 1,
+            "action": "check",
+            "input": null,
+            "params": null
+          }
+        ],
+        "nodes": {
+          "e": {
+            "visit": 2,
+            "arrivals": {
+              "b": {
+                "outcome": "ok",
+                "output": null
+              },
+              "c": {
+                "outcome": "ok",
+                "output": null
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "e",
+          "visit": 2
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "completed"
+      }
+    }
+  ]
+}
