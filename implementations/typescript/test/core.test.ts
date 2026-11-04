@@ -85,4 +85,8 @@ describe("independent sequential core",()=>{
     const d:Definition=structuredClone(hello);(d.nodes.greet as Record<string,unknown>).join="all";
     expect(validateDefinition(d).map(e=>e.code)).toContain("node.member");
   });
+  test("reports a null action instead of throwing",()=>{
+    const d:Definition=structuredClone(hello);(d.actions as Record<string,unknown>).greet=null;
+    expect(validateDefinition(d).map(e=>e.code)).toContain("action.member");
+  });
 });

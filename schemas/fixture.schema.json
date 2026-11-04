@@ -52,7 +52,7 @@
             "required": ["event", "expect"],
             "additionalProperties": false,
             "properties": {
-              "event": { "type": "object", "required": ["type"], "properties": { "type": { "enum": ["start", "result", "signal", "resolve", "cancel"] } } },
+              "event": { "$ref": "#/$defs/event" },
               "expect": {
                 "type": "object",
                 "additionalProperties": false,
@@ -80,6 +80,55 @@
       "required": ["node", "visit"],
       "additionalProperties": false,
       "properties": { "node": { "type": "string" }, "visit": { "type": "integer", "minimum": 1 } }
+    },
+    "event": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "runId"],
+          "additionalProperties": false,
+          "properties": { "type": { "const": "start" }, "runId": { "type": "string", "minLength": 1 }, "input": {} }
+        },
+        {
+          "type": "object",
+          "required": ["type", "invocation", "status"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "result" },
+            "invocation": { "$ref": "#/$defs/reference" },
+            "status": { "enum": ["success", "failure", "unknown"] },
+            "outcome": { "type": "string" },
+            "output": {},
+            "error": { "type": "string" },
+            "retryable": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "name", "outcome"],
+          "additionalProperties": false,
+          "properties": { "type": { "const": "signal" }, "name": { "type": "string" }, "outcome": { "type": "string" }, "output": {} }
+        },
+        {
+          "type": "object",
+          "required": ["type", "invocation", "action"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "resolve" },
+            "invocation": { "$ref": "#/$defs/reference" },
+            "action": { "enum": ["complete", "retry", "fail"] },
+            "outcome": { "type": "string" },
+            "output": {},
+            "error": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": { "type": { "const": "cancel" }, "reason": { "type": "string" } }
+        }
+      ]
     },
     "command": {
       "oneOf": [

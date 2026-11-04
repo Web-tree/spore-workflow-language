@@ -39,6 +39,7 @@ export function validateDefinition(d: Definition, supported: readonly string[] =
 
   for (const [id, action] of Object.entries(actions)) {
     if (!IDENT.test(id)) err("action.id", "invalid action ID: " + id);
+    if (!action || typeof action !== "object") { err("action.member", "action is not an object: " + id); continue; }
     const a = action as ActionContract;
     for (const k of Object.keys(a)) if (!ACTION_MEMBERS.has(k)) err("action.member", "unknown action member: " + id + "." + k);
     if (!EFFECTS.has(a.effect)) err("action.effect", "invalid action effect: " + id);
