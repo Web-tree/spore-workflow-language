@@ -1,0 +1,84 @@
+{
+  "fixture": "definition",
+  "title": "A route to a drop node from outside any region is rejected",
+  "spec": "parallel §3 P14",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "stray",
+    "start": "s",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      },
+      "s": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "a",
+          "skip": "none"
+        }
+      },
+      "none": {
+        "kind": "drop"
+      }
+    }
+  },
+  "expect": {
+    "errors": [
+      "parallel.p14"
+    ]
+  }
+}

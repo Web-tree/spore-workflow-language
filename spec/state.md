@@ -33,6 +33,8 @@ The contract permits SQL, log-based storage or another safe implementation. It d
 
 An inspector may read: run ID, definition identity, execution status, active position(s), latest node outcomes, pending signals, outstanding operation summaries, blockers and recent accepted events. Inspection does not imply a new runtime can resume execution.
 
+The execution statuses are `running`, `waiting`, `needs-intervention`, `stopping` (execution §5: the run has decided to end but an `unsafe` invocation is still out) and the terminal `completed`, `failed` and `cancelled`. A `stopping` view SHOULD show the pending end.
+
 A state view SHOULD be safe to share without embedding credentials, capability grants, secret environment variables, native handles or plaintext sensitive action inputs.
 
 ## 4. Optional resumable interchange

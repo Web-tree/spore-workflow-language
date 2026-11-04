@@ -1,0 +1,90 @@
+{
+  "fixture": "definition",
+  "title": "A nested split whose branches join at the outer gather is rejected",
+  "spec": "parallel §3 P15",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "nested",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b1",
+            "b2"
+          ]
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      },
+      "b1": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "b2": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      }
+    }
+  },
+  "expect": {
+    "errors": [
+      "parallel.p15"
+    ]
+  }
+}

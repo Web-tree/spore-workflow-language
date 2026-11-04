@@ -1,0 +1,120 @@
+{
+  "fixture": "trace",
+  "title": "A second result for an invocation that already arrived is stale and changes nothing",
+  "spec": "parallel §4.6; execution §5",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "two",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p26"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "c"
+        ],
+        "commands": [],
+        "diagnostics": [
+          "result.stale"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "fixture": "definition",
+  "title": "optional beside a need other than all is rejected",
+  "spec": "parallel §3 P10",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "two",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete",
+        "need": "any",
+        "optional": [
+          "c"
+        ]
+      }
+    }
+  },
+  "expect": {
+    "errors": [
+      "parallel.p10"
+    ]
+  }
+}

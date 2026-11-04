@@ -1,0 +1,171 @@
+{
+  "fixture": "trace",
+  "title": "With losers wait, an unmet decision is delayed until every branch has finished, and the late arrival is recorded",
+  "spec": "parallel §4.5, §4.6",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "waitunmet",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "e",
+          "skip": "none"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "none": {
+        "kind": "drop"
+      },
+      "e": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "done",
+          "unmet": "few"
+        },
+        "losers": "wait"
+      },
+      "few": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "done"
+        }
+      },
+      "done": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p6"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "skip"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "c"
+        ],
+        "commands": []
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok",
+        "output": 3
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "few"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "few",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ],
+        "nodes": {
+          "e": {
+            "visit": 0,
+            "outcome": "unmet",
+            "output": null,
+            "arrivals": {
+              "b": null,
+              "c": {
+                "outcome": "ok",
+                "output": 3
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

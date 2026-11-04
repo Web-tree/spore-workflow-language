@@ -1,0 +1,160 @@
+{
+  "fixture": "trace",
+  "title": "Several routes may lead to one node; the one taken enters it once, and from names that route",
+  "spec": "execution §2",
+  "profiles": [
+    "core"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "merge",
+    "start": "a",
+    "requires": [
+      "core"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "pick",
+        "routes": {
+          "ok": "m",
+          "skip": "n"
+        }
+      },
+      "n": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "m"
+        }
+      },
+      "m": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "done"
+        },
+        "input": {
+          "$get": [
+            "from",
+            "node"
+          ]
+        }
+      },
+      "done": {
+        "kind": "complete"
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "c1"
+      },
+      "expect": {
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "a",
+            "visit": 1,
+            "attempt": 1,
+            "action": "pick",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "skip"
+      },
+      "expect": {
+        "positions": [
+          "n"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "n",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "n",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "m"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "m",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": "n",
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "m",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "completed",
+        "nodes": {
+          "m": {
+            "visit": 1,
+            "outcome": "ok",
+            "output": null
+          }
+        }
+      }
+    }
+  ]
+}

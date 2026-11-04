@@ -1,0 +1,80 @@
+{
+  "fixture": "definition",
+  "title": "A mapping in one region may not read a node of another region of the same split",
+  "spec": "parallel §3 P11",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "peek",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      },
+      "pick": {
+        "effect": "pure",
+        "outcomes": [
+          "ok",
+          "skip"
+        ]
+      },
+      "write": {
+        "effect": "unsafe",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        },
+        "input": {
+          "$get": [
+            "nodes",
+            "c",
+            "output"
+          ]
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete"
+      }
+    }
+  },
+  "expect": {
+    "errors": [
+      "parallel.p11"
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "fixture": "dot",
+  "title": "A group inside a group is rejected",
+  "spec": "notation §2, §3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "source": "digraph \"ci\" {\n  start = \"a\";\n  a -> {b {c d}} -> e;\n  e [kind=\"complete\"];\n}\n",
+  "settings": {
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "action": "step"
+      },
+      "b": {
+        "action": "step"
+      },
+      "c": {
+        "action": "step"
+      },
+      "e": {
+        "action": "step"
+      }
+    }
+  },
+  "expect": {
+    "rejected": true
+  }
+}

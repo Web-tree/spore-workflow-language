@@ -1,0 +1,94 @@
+{
+  "fixture": "dot",
+  "title": "A numeric need normalizes to an integer",
+  "spec": "notation §3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "source": "digraph \"ci\" {\n  start = \"a\";\n  a -> {b c} -> e [on=\"ok\"];\n  e [need=\"2\"];\n  e -> done;\n  done [kind=\"complete\"];\n}\n",
+  "settings": {
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "action": "step"
+      },
+      "b": {
+        "action": "step"
+      },
+      "c": {
+        "action": "step"
+      },
+      "e": {
+        "action": "step"
+      }
+    }
+  },
+  "expect": {
+    "definition": {
+      "language": "swl",
+      "name": "ci",
+      "start": "a",
+      "requires": [
+        "core",
+        "parallel"
+      ],
+      "actions": {
+        "step": {
+          "effect": "read-only",
+          "outcomes": [
+            "ok"
+          ]
+        }
+      },
+      "nodes": {
+        "a": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": [
+              "b",
+              "c"
+            ]
+          }
+        },
+        "b": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "e"
+          }
+        },
+        "c": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "e"
+          }
+        },
+        "e": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "done"
+          },
+          "need": 2
+        },
+        "done": {
+          "kind": "complete"
+        }
+      }
+    }
+  }
+}

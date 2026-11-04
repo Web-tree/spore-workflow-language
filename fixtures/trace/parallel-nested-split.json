@@ -1,0 +1,275 @@
+{
+  "fixture": "trace",
+  "title": "A split inside a branch has its own gather; the inner gather's outcome is the outer branch's arrival",
+  "spec": "parallel §3, §4.2, §4.3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "definition": {
+    "language": "swl",
+    "name": "nested",
+    "start": "a",
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b",
+            "c"
+          ]
+        }
+      },
+      "b": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": [
+            "b1",
+            "b2"
+          ]
+        }
+      },
+      "b1": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "bg"
+        }
+      },
+      "b2": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "bg"
+        }
+      },
+      "bg": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "c": {
+        "kind": "activity",
+        "action": "step",
+        "routes": {
+          "ok": "e"
+        }
+      },
+      "e": {
+        "kind": "complete",
+        "output": {
+          "$get": [
+            "arrivals"
+          ]
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "event": {
+        "type": "start",
+        "runId": "p12"
+      },
+      "expect": {
+        "status": "running"
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "a",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b",
+          "c"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "b",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          },
+          {
+            "type": "invoke",
+            "node": "c",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "b1",
+          "b2",
+          "c"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "b1",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          },
+          {
+            "type": "invoke",
+            "node": "b2",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ]
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b1",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "b2",
+          "c"
+        ],
+        "commands": []
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "b2",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "positions": [
+          "bg",
+          "c"
+        ],
+        "commands": [
+          {
+            "type": "invoke",
+            "node": "bg",
+            "visit": 1,
+            "attempt": 1,
+            "action": "step",
+            "input": null,
+            "params": null
+          }
+        ],
+        "nodes": {
+          "bg": {
+            "visit": 1,
+            "arrivals": {
+              "b1": {
+                "outcome": "ok",
+                "output": null
+              },
+              "b2": {
+                "outcome": "ok",
+                "output": null
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "bg",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok",
+        "output": "G"
+      },
+      "expect": {
+        "status": "running",
+        "positions": [
+          "c"
+        ],
+        "commands": []
+      }
+    },
+    {
+      "event": {
+        "type": "result",
+        "invocation": {
+          "node": "c",
+          "visit": 1
+        },
+        "status": "success",
+        "outcome": "ok"
+      },
+      "expect": {
+        "status": "completed",
+        "result": {
+          "b": {
+            "outcome": "ok",
+            "output": "G"
+          },
+          "c": {
+            "outcome": "ok",
+            "output": null
+          }
+        }
+      }
+    }
+  ]
+}

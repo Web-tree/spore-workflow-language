@@ -1,0 +1,42 @@
+{
+  "fixture": "dot",
+  "title": "need is authoritative in DOT and may not come from settings",
+  "spec": "notation §1, §3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "source": "digraph \"ci\" {\n  start = \"a\";\n  a -> {b c} -> e;\n  e -> done;\n  done [kind=\"complete\"];\n}\n",
+  "settings": {
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "action": "step"
+      },
+      "b": {
+        "action": "step"
+      },
+      "c": {
+        "action": "step"
+      },
+      "e": {
+        "action": "step",
+        "need": "any"
+      }
+    }
+  },
+  "expect": {
+    "rejected": true
+  }
+}

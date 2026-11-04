@@ -1,0 +1,94 @@
+{
+  "fixture": "dot",
+  "title": "A group on the right of an arrow is a split; a group on the left is two ordinary edges; need normalizes from the node attribute",
+  "spec": "notation §2, §3",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "source": "digraph \"ci\" {\n  start = \"a\";\n  a -> {c b};\n  {b c} -> e;\n  e [need=\"any\"];\n  e -> done;\n  done [kind=\"complete\"];\n}\n",
+  "settings": {
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "action": "step"
+      },
+      "b": {
+        "action": "step"
+      },
+      "c": {
+        "action": "step"
+      },
+      "e": {
+        "action": "step"
+      }
+    }
+  },
+  "expect": {
+    "definition": {
+      "language": "swl",
+      "name": "ci",
+      "start": "a",
+      "requires": [
+        "core",
+        "parallel"
+      ],
+      "actions": {
+        "step": {
+          "effect": "read-only",
+          "outcomes": [
+            "ok"
+          ]
+        }
+      },
+      "nodes": {
+        "a": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": [
+              "b",
+              "c"
+            ]
+          }
+        },
+        "b": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "e"
+          }
+        },
+        "c": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "e"
+          }
+        },
+        "e": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "done"
+          },
+          "need": "any"
+        },
+        "done": {
+          "kind": "complete"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "fixture": "dot",
+  "title": "A chain through a group splits at the node before it and routes every member to the node after it",
+  "spec": "notation §2",
+  "profiles": [
+    "core",
+    "parallel"
+  ],
+  "source": "digraph \"ci\" {\n  start = \"a\";\n  a -> {b c} -> e;\n  e [kind=\"activity\", need=\"any\"];\n  e -> done;\n  done [kind=\"complete\"];\n}\n",
+  "settings": {
+    "requires": [
+      "core",
+      "parallel"
+    ],
+    "actions": {
+      "step": {
+        "effect": "read-only",
+        "outcomes": [
+          "ok"
+        ]
+      }
+    },
+    "nodes": {
+      "a": {
+        "action": "step"
+      },
+      "b": {
+        "action": "step"
+      },
+      "c": {
+        "action": "step"
+      },
+      "e": {
+        "action": "step"
+      }
+    }
+  },
+  "expect": {
+    "definition": {
+      "language": "swl",
+      "name": "ci",
+      "start": "a",
+      "requires": [
+        "core",
+        "parallel"
+      ],
+      "actions": {
+        "step": {
+          "effect": "read-only",
+          "outcomes": [
+            "ok"
+          ]
+        }
+      },
+      "nodes": {
+        "a": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": [
+              "b",
+              "c"
+            ]
+          }
+        },
+        "b": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "e"
+          }
+        },
+        "c": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "e"
+          }
+        },
+        "e": {
+          "kind": "activity",
+          "action": "step",
+          "routes": {
+            "ok": "done"
+          },
+          "need": "any"
+        },
+        "done": {
+          "kind": "complete"
+        }
+      }
+    }
+  }
+}
