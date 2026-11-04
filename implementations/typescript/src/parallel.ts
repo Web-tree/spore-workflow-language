@@ -87,7 +87,8 @@ export function analyze(d: Definition): Analysis {
       if (!Array.isArray(r)) continue;
       const targets = r.filter(t => typeof t === "string" && t in d.nodes);
       const M = targets.length;
-      if (M < 2 || r.length !== M) { if (r.length >= 2) err(2, "split with unknown targets: " + S + "." + outcome); continue; }
+      if (r.length < 2) { err(8, "a route array needs two or more targets: " + S + "." + outcome); continue; }
+      if (M !== r.length) { err(2, "split with unknown targets: " + S + "." + outcome); continue; }
       const sorted = [...targets].sort();
       if (targets.some((t, i) => t !== sorted[i]) || new Set(targets).size !== M) err(8, "split targets must be unique and ascending: " + S + "." + outcome);
       const R = Object.fromEntries(targets.map(t => [t, minus(reach(d, t, new Set([S])), id => ENDS.has(kind(d, id) as string))]));
@@ -110,6 +111,7 @@ export function analyze(d: Definition): Analysis {
         else err(8, "need must be all, any or 1.." + M + ": " + gather);
       }
       const optional = Array.isArray(g.optional) ? g.optional.filter((o): o is string => typeof o === "string") : [];
+      if (g.optional !== undefined && (!Array.isArray(g.optional) || optional.length !== g.optional.length || new Set(optional).size !== optional.length)) err(8, "optional must be an array of unique branch names: " + gather);
       const losers = g.losers === "wait" ? "wait" : "stop";
       if (g.losers !== undefined && g.losers !== "stop" && g.losers !== "wait") err(8, "losers must be stop or wait: " + gather);
       splits.push({ node: S, outcome, targets, gather, regions, need, optional, losers, canMiss: false, canLeaveLosers: false });

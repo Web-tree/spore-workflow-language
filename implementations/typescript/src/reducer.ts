@@ -130,10 +130,12 @@ function split(c: Ctx, p: Position, source: string, outcome: string, from: From,
   const key = source + "#" + s.visits[source];
   const inst: SplitInstance = { node: source, visit: s.visits[source], outcome, gather: def.gather, targets, parent: p.split, branch: p.branch, arrivals: {} };
   const branches: Position[] = targets.map(t => ({ node: t, invocation: null, parked: false, from, split: key, branch: t }));
+  // All targets are entered or none: commands are staged, and the counters are restored on failure.
   const inner: Ctx = { ...c, commands: [] };
+  const saved = { visits: structuredClone(s.visits), activations: s.activations };
   for (const b of branches) {
     const failure = enter(inner, b, b.node, from);
-    if (failure) { stop(c, { status: "failed", error: failure }); return; }
+    if (failure) { s.visits = saved.visits; s.activations = saved.activations; stop(c, { status: "failed", error: failure }); return; }
   }
   s.positions.splice(s.positions.indexOf(p), 1, ...branches);
   s.splits[key] = inst;

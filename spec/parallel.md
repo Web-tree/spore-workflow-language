@@ -76,7 +76,7 @@ A validator MUST reject each of these before any side effect, with the code `par
 | P5 | A route into a region from anywhere but its split's own split route; a route into a gather from outside its regions; `start` inside a region or at a gather |
 | P6 | A `complete` node inside a region |
 | P7 | A region node with no path to its gather, a `fail` node or a `drop` node |
-| P8 | A route array that isn't in ascending order or has a duplicate; a `need` that isn't `"all"`, `"any"` or an integer in 1..M; a `losers` that isn't `"stop"` or `"wait"`; `need`, `optional` or `losers` on a node that isn't a gather; an `unmet` route on a node that isn't a gather, or on a gather that cannot miss its need |
+| P8 | A route array with fewer than two targets, not in ascending order, or with a duplicate; a `need` that isn't `"all"`, `"any"` or an integer in 1..M; an `optional` that isn't an array of unique branch names; a `losers` that isn't `"stop"` or `"wait"`; `need`, `optional` or `losers` on a node that isn't a gather; an `unmet` route on a node that isn't a gather, or on a gather that cannot miss its need |
 | P9 | A gather that can miss its need and has no `unmet` route; a terminal gather that can miss its need |
 | P10 | `optional` beside a `need` other than `"all"` or M; an `optional` name that isn't a branch of the split; a gather whose arrivals are all optional, because it could start with nothing |
 | P11 | A mapping in a region that reads `nodes.<id>` for a node of another region of the same split; a mapping that reads `arrivals` on a node that isn't a gather |
