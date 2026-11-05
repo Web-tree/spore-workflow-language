@@ -6,6 +6,17 @@ SWL defines how workflow graphs, action interfaces, execution, and durable state
 
 > **Status: public working draft.** This repository is the independent specification source. No stable conformance claim or runtime compatibility is implied until the conformance suite is implemented and passed. Legacy Runspore dialect identifiers are intentionally not part of the SWL specification.
 
+## Choose your documentation
+
+| What you want to do | Start here |
+| --- | --- |
+| Install Runspore, create a workflow, run it and inspect its progress | [Runspore user documentation](https://runspore.com/docs) |
+| Understand the portable language or build an independent implementation | [SWL specification](spec/README.md) |
+| Read the standard within the Runspore documentation | [SWL reference chapter](https://runspore.com/docs/swl), a pinned snapshot of this repository |
+| Explore the draft semantics in code and run the fixtures | [TypeScript/Bun implementation](implementations/typescript/README.md) |
+
+Runspore's guides describe its supported commands, workflow format and runtime behavior. The SWL specification describes the independent language contract; its examples and feature profiles do not establish support in a particular Runspore release.
+
 ## Read the specification
 
 | Part | Defines | Useful for |
@@ -54,7 +65,11 @@ The graph defines topology and outcome routing. Node and action contracts live i
 
 ## Relationship to Runspore
 
-SWL owns the standard, schemas, examples and tests. Runspore owns its runtime, CLI, storage adapter and implementation documentation. [Runspore's website](https://runspore.com/docs) is intended to show a pinned copy of this same specification, not a second editable source.
+SWL owns the standard, schemas, examples and conformance fixtures. Runspore owns its runtime, CLI, storage adapter and [user documentation](https://runspore.com/docs), including installation, workflow authoring, execution and troubleshooting.
+
+The [SWL chapter](https://runspore.com/docs/swl) is one reference section within that user documentation. It displays a pinned revision of this repository and links back here for edits. The hosted snapshot may lag this repository's `main` branch; use its displayed revision when comparing behavior or reporting an issue. Propose language changes here so the website and other consumers can update from the same source.
+
+The [TypeScript/Bun implementation](implementations/typescript/README.md) is a library for exploring and testing draft SWL semantics. Its fixture results describe that implementation and revision; they do not establish Runspore conformance or durable-host guarantees.
 
 ## Contributing
 
